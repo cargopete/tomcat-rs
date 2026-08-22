@@ -1,0 +1,15 @@
+[Unit]
+Description=TomCat ultrasonic cat deterrent (PIR-triggered)
+After=network.target
+
+[Service]
+Type=simple
+# Runs as root: the /sys/class/pwm nodes are root-owned. A udev rule granting
+# the gpio group write access would let this drop to User=pi.
+EnvironmentFile=-/home/pi/tomcat-rs/.env
+ExecStart=/usr/local/bin/catdeter
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

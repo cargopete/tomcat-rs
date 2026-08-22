@@ -1,0 +1,17 @@
+[Unit]
+Description=TomCat continuous ultrasonic tone (manual on/off, no sensor)
+After=network.target
+
+[Service]
+Type=simple
+# Runs as root: the /sys/class/pwm nodes are root-owned.
+# Deliberately NOT enabled by default. This unit is a switch, not a daemon:
+#   sudo systemctl start tomcat-tone     # horn on
+#   sudo systemctl stop  tomcat-tone     # horn off
+EnvironmentFile=-/home/pi/tomcat-rs/.env
+ExecStart=/usr/local/bin/tone-sweep
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
