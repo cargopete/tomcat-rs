@@ -1,0 +1,48 @@
+# yatr - https://github.com/cargopete/yatr
+#
+# CI calls these tasks by name, so `yatr ci` locally is the same gate.
+
+[env]
+CARGO_TERM_COLOR = "always"
+
+[tasks.fmt]
+desc = "Format the tree"
+run = ["cargo fmt"]
+no_cache = true
+
+[tasks.fmt-check]
+desc = "Fail if the tree is unformatted (CI: check)"
+run = ["cargo fmt --check"]
+sources = ["src/**"]
+
+[tasks.lint]
+desc = "Clippy with warnings denied (CI: check)"
+run = ["cargo clippy --all-targets -- -D warnings"]
+sources = ["src/**", "Cargo.toml", "Cargo.lock"]
+
+[tasks.test]
+desc = "The test suite; runs anywhere, not just on a Pi (CI: check)"
+run = ["cargo test"]
+sources = ["src/**", "Cargo.toml", "Cargo.lock"]
+watch = ["src/**"]
+
+[tasks.build]
+desc = "Release build of tone-sweep and catdeter for this host"
+run = ["cargo build --release"]
+sources = ["src/**", "Cargo.toml", "Cargo.lock"]
+outputs = ["target/release/tone-sweep", "target/release/catdeter"]
+
+# Needs `rustup target add aarch64-unknown-linux-gnu` and an aarch64-linux-gnu-gcc on PATH.
+[tasks.cross]
+desc = "Release build for the Pi (CI: cross)"
+run = ["cargo build --release --target aarch64-unknown-linux-gnu"]
+env = { CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER = "aarch64-linux-gnu-gcc" }
+sources = ["src/**", "Cargo.toml", "Cargo.lock"]
+outputs = [
+  "target/aarch64-unknown-linux-gnu/release/tone-sweep",
+  "target/aarch64-unknown-linux-gnu/release/catdeter",
+]
+
+[tasks.ci]
+desc = "What the CI check job runs: fmt-check, lint, test"
+depends = ["fmt-check", "lint", "test"]
